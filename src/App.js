@@ -7,18 +7,26 @@ const initialItems = [
 
 
 export default function App() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([initialItems]);
 
   function handlAddItem(item) {
    setItems(items => [...items, item]);
 }
 
+function onDelete(id) {
+    setItems(items => items.filter(i => i.id !== id ));
+  }
+
+function toggleItem(id) {
+    setItems(items => items.map(item =>item.id === id ? { ...item, packed: !item.packed } : item));
+    };
+
   return (
     <div className="app">
      <Logo />
      <Form  onAdItem={handlAddItem}/>
-     <PackingList items={items} modifyItem={setItems} />
-     <Stats />
+     <PackingList items={items} onDelete={onDelete} itemToggle={toggleItem} />
+     <Stats items={items} />
     </div>
   );
 
@@ -62,37 +70,40 @@ const [quantity, setQuantity] = useState(1);
   )
 }
 
-function PackingList({ items , modifyItem }) {
+function PackingList({ items , onDelete, itemToggle }) {
   return(
   <div className="list">
     <ul >
       {items.map(item => 
-        ( <Item item={item} key={item.id} modifyItem={modifyItem}/> ))}
+        ( <Item item={item} key={item.id} onDelete={onDelete} itemToggle={itemToggle}/> ))}
     </ul>
   </div>
   )
 }
 
-function Item({ item  , modifyItem }) {
-  function toggleItem() {
-    modifyItem(items => items.map(i => i.id === item.id ? { ...i, packed: !i.packed } : i));
-  }
+function Item({ item  , onDelete, itemToggle }) {
   
+
   return (
     <li>
+      <input type="checkbox" value={item.packed} onChange={()=>{itemToggle(item.id)}}/>
       <span style={item.packed ? { textDecoration: "line-through" }: {}}>
       {item.description} {item.quantity}
       </span>
-      <button onClick={toggleItem}>❌</button>
+      <button onClick={()=> onDelete(item.id)}>❌</button>
       </li>
   )
 }
 
 
-function Stats() {
+function Stats({items}) {
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length; 
+  const packedPercentage = numItems !== numPacked ? (numPacked / numItems * 100).toFixed(2) : numItems === 0 ? "No items yet" : "You'r packed";
+
   return(
     <footer className="stats">
-      <em>You have X items, and you alrady packed X</em>
+      <em>You have {numItems} items, and you alrady packed  {numPacked} - ({packedPercentage})</em>
       </footer>
   )
 }
