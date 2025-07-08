@@ -7,11 +7,17 @@ const initialItems = [
 
 
 export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handlAddItem(item) {
+   setItems(items => [...items, item]);
+}
+
   return (
     <div className="app">
-     <Form />
      <Logo />
-     <PackingList />
+     <Form  onAdItem={handlAddItem}/>
+     <PackingList items={items} modifyItem={setItems} />
      <Stats />
     </div>
   );
@@ -25,14 +31,20 @@ function Logo() {
   )
 }
 
-function Form() {
+function Form({onAdItem}) {
 
 const [description, setDescription] = useState("");
-const [quantity, setQuantity] = useState(0);
+const [quantity, setQuantity] = useState(1);
 
-  function handleSubmit(event) {
+  function handleSubmit(event ) {
     event.preventDefault();
-   
+
+    if(!description || quantity <= 0) return;
+      
+    const newItem = {description, quantity, packed: false, id: Date.now()};
+    onAdItem(newItem);
+    setDescription("");
+    setQuantity(1);
   }
 
   return(
@@ -50,24 +62,28 @@ const [quantity, setQuantity] = useState(0);
   )
 }
 
-function PackingList() {
+function PackingList({ items , modifyItem }) {
   return(
   <div className="list">
     <ul >
-      {initialItems.map(item => 
-        ( <Item item={item} key={item.id}/> ))}
+      {items.map(item => 
+        ( <Item item={item} key={item.id} modifyItem={modifyItem}/> ))}
     </ul>
   </div>
   )
 }
 
-function Item({ item }) {
+function Item({ item  , modifyItem }) {
+  function toggleItem() {
+    modifyItem(items => items.map(i => i.id === item.id ? { ...i, packed: !i.packed } : i));
+  }
+  
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" }: {}}>
       {item.description} {item.quantity}
       </span>
-      <button>❌</button>
+      <button onClick={toggleItem}>❌</button>
       </li>
   )
 }
