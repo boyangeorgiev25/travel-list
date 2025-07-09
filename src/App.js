@@ -25,7 +25,7 @@ function toggleItem(id) {
     <div className="app">
      <Logo />
      <Form  onAdItem={handlAddItem}/>
-     <PackingList items={items} onDelete={onDelete} itemToggle={toggleItem} />
+     <PackingList setItems={setItems} items={items} onDelete={onDelete} itemToggle={toggleItem} />
      <Stats items={items} />
     </div>
   );
@@ -70,7 +70,12 @@ const [quantity, setQuantity] = useState(1);
   )
 }
 
-function PackingList({ items , onDelete, itemToggle }) {
+function PackingList({setItems, items , onDelete, itemToggle }) {
+
+
+  function ClearList(){
+    setItems([]);
+  }
 
 const [sortBy, setSortBy] = useState("input");
 
@@ -94,6 +99,7 @@ if(sortBy === "packed") sortedItems = [...items].sort((a, b) => Number(a.packed)
   <option value="description">Sort by description</option>
   <option value="packed">Sort by packed</option>
 </select>
+<button onClick={ClearList}>Clear</button>
 </div>
 
 
